@@ -1,3 +1,4 @@
+<pre>
 CREATE OR REPLACE TABLE steam_games_flat AS
 WITH raw_data AS (
     SELECT unnest(games) AS g
@@ -18,12 +19,15 @@ SELECT
 FROM raw_data
 WHERE g.app_details.success = true;
 100% ?██████████████████████████████████████? (00:00:05.55 elapsed)
+</pre>
 
-
+<pre>
 SELECT name, recommendations, price
 FROM steam_games_flat
 ORDER BY recommendations DESC
 LIMIT 20;
+</pre>
+<pre>
 ┌────────────────────────────────────────────────┬─────────────────┬────────┐
 │                      name                      │ recommendations │ price  │
 │                    varchar                     │      int64      │ double │
@@ -51,12 +55,14 @@ LIMIT 20;
 ├────────────────────────────────────────────────┴─────────────────┴────────┤
 │ 20 rows                                                         3 columns │
 └───────────────────────────────────────────────────────────────────────────┘
-
+</pre>
+<pre>
 SELECT RIGHT(release_date_raw, 4) AS release_year, COUNT(*) AS games_count
 FROM steam_games_flat
 WHERE length(release_date_raw) >= 4
 GROUP BY 1 ORDER BY 2 DESC;
-
+</pre>
+<pre>
 ┌──────────────┬─────────────┐
 │ release_year │ games_count │
 │   varchar    │    int64    │
@@ -91,14 +97,16 @@ GROUP BY 1 ORDER BY 2 DESC;
 ├──────────────┴─────────────┤
 │ 27 rows          2 columns │
 └────────────────────────────┘
-
+</pre>
+<pre>
 SELECT g_unnested.description AS genre, ROUND(AVG(price), 2) AS avg_price
 FROM (
     SELECT price, UNNEST(genres) AS g_unnested
     FROM steam_games_flat WHERE price > 0
 )
 GROUP BY 1 ORDER BY 2 DESC;
-
+</pre>
+<pre>
 ┌───────────────────────┬───────────┐
 │         genre         │ avg_price │
 │        varchar        │  double   │
@@ -144,13 +152,16 @@ GROUP BY 1 ORDER BY 2 DESC;
 ├───────────────────────┴───────────┤
 │ 38 rows                 2 columns │
 └───────────────────────────────────┘
-
+</pre>
+<pre>
 SELECT c_unnested.description AS category, COUNT(*) AS frequency
 FROM (
     SELECT UNNEST(categories) AS c_unnested FROM steam_games_flat
 )
 GROUP BY 1 ORDER BY 2 DESC LIMIT 10;
+</pre>
 
+<pre>
 ┌────────────────────────────┬───────────┐
 │          category          │ frequency │
 │          varchar           │   int64   │
@@ -168,13 +179,15 @@ GROUP BY 1 ORDER BY 2 DESC LIMIT 10;
 ├────────────────────────────┴───────────┤
 │ 10 rows                      2 columns │
 └────────────────────────────────────────┘
-
+</pre>
+<pre>
 SELECT
     CASE WHEN is_free THEN 'Free' ELSE 'Paid' END AS type,
     COUNT(*) AS total_games,
     ROUND(AVG(recommendations), 0) AS avg_reviews
 FROM steam_games_flat GROUP BY 1;
-
+</pre>
+<pre>
 ┌─────────┬─────────────┬─────────────┐
 │  type   │ total_games │ avg_reviews │
 │ varchar │    int64    │   double    │
@@ -182,3 +195,4 @@ FROM steam_games_flat GROUP BY 1;
 │ Paid    │        6324 │       709.0 │
 │ Free    │        1643 │       763.0 │
 └─────────┴─────────────┴─────────────┘
+</pre>
